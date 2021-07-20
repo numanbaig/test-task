@@ -1,16 +1,24 @@
 import { useQuery } from "react-query";
 import axios from "axios";
-const token = "059c420e-7424-431f-b23b-af0ecabfe7b8";
-export default function useFetchCategories() {
-  const data = useQuery("contacts", () =>
+import { BaseUrl, accessToken } from "../api";
+
+export default function useFetchCategoriesImage() {
+  const data = useQuery("contactsImage", () =>
     axios
-      .get("https://api-im.chatdaddy.tech/contacts", {
+      .get(`${BaseUrl}/contacts`, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       })
-      .then((res) => res.data)
+      .then((res) => {
+        const response = res.data.contacts.filter((e) => e.name !== null);
+        const sort = response.sort((a, b) => {
+          if (a.name !== null && b.name !== null) {
+            return a.name.localeCompare(b.name);
+          }
+        });
+        return sort;
+      })
   );
   return data;
 }

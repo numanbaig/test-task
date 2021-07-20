@@ -1,15 +1,11 @@
-import React from "react";
-import Avatar from "@material-ui/core/Avatar";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import AppBar from "../components/AppBar";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import Divider from "@material-ui/core/Divider";
-import clsx from "clsx";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
 import FetchContacts from "../hooks/useFetchContacts";
-import { useEffect } from "react";
+import ListItem from "../components/ListItem";
 const Home = () => {
   const classes = useStyles();
   const {
@@ -17,11 +13,57 @@ const Home = () => {
     isLoading: ContactsLoading,
     isError: ContactsError,
   } = FetchContacts();
-  console.log("contacts", contacts);
-  console.log("error", ContactsError);
+
+  const [search, setSearch] = useState("");
+  const [newContacts, setNewContacts] = useState([]);
+  const [sortedArray, setSortedArray] = useState([]);
+  const [newArray, setNewArray] = useState([]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSearch("");
+  };
+  const renderList = (contactList) => {
+    if (contactList) {
+      let array = [];
+      for (let i = 0; i < contactList.length; i++) {
+        if (i === 0) {
+          array.push({
+            letter: contactList[i].name[0],
+            item: contactList[i],
+            index: i,
+          });
+        }
+        if (contactList[i - 1]) {
+          array.push({
+            letter: contactList[i - 1].name[0],
+            item: contactList[i],
+            index: i,
+          });
+        }
+      }
+      setNewArray(array);
+    }
+  };
+
+  useEffect(() => {
+    if (search === "") {
+      renderList(contacts);
+    } else {
+      const array = newContacts.filter((e) => e.name.includes(search));
+      renderList(array);
+    }
+  }, [contacts, search]);
+
+  useEffect(() => {
+    setNewContacts(contacts);
+  }, [contacts]);
   return (
     <div className={classes.home}>
-      <AppBar />
+      <AppBar
+        handleSubmit={handleSubmit}
+        setSearch={setSearch}
+        search={search}
+      />
       <div className={classes.wrapper}>
         <div className={classes.list}>
           <CheckCircleIcon className={classes.btnIcon} />
@@ -29,47 +71,39 @@ const Home = () => {
             Export All
           </Button>
         </div>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 12, 1, 1, 1, 1].map((e, index) => (
+        {ContactsError === true ? (
           <div>
-            <Typography className={classes.bold}>
-              {index === 0 && "A"}{" "}
-            </Typography>
-            <div className={classes.list}>
-              <div className={classes.width}>
-                <div className={classes.flex}>
-                  <CheckCircleIcon className={classes.btnIcon} />
-                  <div className={clsx(classes.flex)}>
-                    <Avatar className={classes.avatar} />
-                    <div className={classes.info}>
-                      <Typography className={classes.name}>
-                        Noman Baig
-                      </Typography>
-                      <Typography className={classes.phone}>
-                        +923174697659
-                      </Typography>
-                    </div>
-                  </div>
-                </div>
-                <Divider className={classes.divider} />
-              </div>
-              <div className={clsx(classes.width, classes.flexEnd)}>
-                {index === 3 && (
-                  <Button className={classes.tagBtn} variant="contained">
-                    Tag
-                    <AddCircleIcon className={classes.tagIn} />
-                  </Button>
-                )}
-                <AddCircleIcon className={classes.addBtn} />
-              </div>
-            </div>
+            <Typography>Error</Typography>
           </div>
-        ))}
+        ) : (
+          <div>
+            {newArray.length !== 0 &&
+              newArray.map((item, index) => {
+                return (
+                  <ListItem
+                    letter={item.letter}
+                    item={item.item}
+                    index={index}
+                  />
+                );
+              })}
+          </div>
+        )}
       </div>
     </div>
   );
 };
 export default Home;
 const useStyles = makeStyles((theme) => ({
+  list: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  wrapper: {
+    paddingTop: 20,
+  },
   submitBtn: {
     marginBottom: 20,
     backgroundColor: theme.palette.primary.primary,
@@ -80,31 +114,11 @@ const useStyles = makeStyles((theme) => ({
       fontSize: 12,
     },
   },
+
   btnIcon: {
     fontSize: 22,
     minWidth: "unset",
     color: theme.palette.primary.label,
-  },
-  list: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  wrapper: {
-    paddingTop: 20,
-  },
-  appBar: {
-    position: "sticky",
-  },
-  flex: {
-    display: "flex",
-    alignItems: "center",
-  },
-  avatar: {
-    marginLeft: 20,
-    width: 55,
-    height: 55,
   },
   info: {
     marginLeft: 10,

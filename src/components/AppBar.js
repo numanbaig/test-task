@@ -5,8 +5,9 @@ import Typography from "@material-ui/core/Typography";
 import clsx from "clsx";
 import Input from "./Input";
 import AppBar from "@material-ui/core/AppBar";
-const AppBarComponent = () => {
+const AppBarComponent = ({ search, setSearch, handleSubmit }) => {
   const classes = useStyles();
+
   return (
     <AppBar position="sticky" className={clsx(classes.appBar)}>
       <div>
@@ -17,7 +18,11 @@ const AppBarComponent = () => {
           <AddCircleIcon className={classes.addIcon} />
         </div>
         <div className={classes.inputContainer}>
-          <Input />
+          <Input
+            handleSubmit={handleSubmit}
+            search={search}
+            setSearch={setSearch}
+          />
         </div>
       </div>
     </AppBar>
